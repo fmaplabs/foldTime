@@ -38,7 +38,7 @@ surface that only prints stubs — no real logic yet.
   `schemars --features derive`, `chrono`, `dirs`, `anyhow`, `tempfile --dev`
 - [x] Rewrite `main.rs`: call `Cli::parse()`, then `match cli.command { ... }`
   with a `println!` stub per arm showing what it received
-- [ ] Verify: `cargo build` succeeds; `cargo run -- init --with-config`,
+- [x] Verify: `cargo build` succeeds; `cargo run -- init --with-config`,
   `cargo run -- heartbeat --file foo.rs --write`, `cargo run -- report
   --project X --since 2026-01-01` etc. each print something sensible, and
   `cargo run -- init --help` shows `--with-config` as an actual option (not a
@@ -65,4 +65,5 @@ Modules](https://doc.rust-lang.org/book/ch07-00-managing-growing-projects-with-p
 - [clap examples (runnable subcommand samples)](https://github.com/clap-rs/clap/tree/master/examples)
 - [The Rust Book ch. 6 — Enums and Pattern
 Matching](https://doc.rust-lang.org/book/ch06-00-enums-and-pattern-matching.html)
-- [The Rust Book Appendix C — Derivable Traits](https://doc.rust-lang.org/book/appendix-03-derivable-traits.html) (background on what `#[derive(...)]` does generally)
+- [The Rust Book Appendix C — Derivable Traits](https://doc.rust-lang.org/book/appendix-03-derivable-traits.html)
+(background on what `#[derive(...)]` does generally)

@@ -12,20 +12,20 @@ inside it.
 
 ## Tasks
 
-- [ ] Resolve the home directory via `dirs::home_dir()` and build the
+- [x] Resolve the home directory via `dirs::home_dir()` and build the
   `~/.foldtime` path
-- [ ] Ensure `~/.foldtime` exists, creating it if necessary
+- [x] Ensure `~/.foldtime` exists, creating it if necessary
   (`fs::create_dir_all`)
-- [ ] Expose the DB file path (`~/.foldtime/foldtime.db`)
-- [ ] Expose the error-log file path (e.g. `~/.foldtime/error.log`)
-- [ ] Decide the error type for "no home directory could be resolved" — this
+- [x] Expose the DB file path (`~/.foldtime/foldtime.db`)
+- [x] Expose the error-log file path (e.g. `~/.foldtime/error.log`)
+- [x] Decide the error type for "no home directory could be resolved" — this
   is a real (if rare) failure mode, not a `panic!`/`unwrap()` case
-- [ ] **Forward-looking decision**: should these paths be overridable via an
+- [x] **Forward-looking decision**: should these paths be overridable via an
   env var (e.g. `FOLDTIME_HOME`)? Stage 10's integration test will run the
   real compiled binary end-to-end and needs to avoid writing into your actual
   `~/.foldtime` during tests — decide and implement the override now while
   you're already in this file, rather than retrofitting it later
-- [ ] Unit tests: pure path-joining logic tested without touching the real
+- [x] Unit tests: pure path-joining logic tested without touching the real
   filesystem where possible; directory-creation behavior tested against a
   `tempfile::tempdir()` (or the env var override, if you add one)
 

@@ -13,20 +13,20 @@ free.
 
 ## Tasks
 
-- [ ] `repo_root(cwd: &Path) -> Result<PathBuf>` via `git rev-parse --show-toplevel`
-- [ ] `current_branch(cwd: &Path) -> Result<String>` via `git symbolic-ref
+- [x] `repo_root(cwd: &Path) -> Result<PathBuf>` via `git rev-parse --show-toplevel`
+- [x] `current_branch(cwd: &Path) -> Result<String>` via `git symbolic-ref
   --short -q HEAD` — this fails cleanly (non-zero exit) on detached HEAD
   rather than returning an ambiguous `"HEAD"`; decide how the detached case
   gets represented (plan: `detached@<short-sha>`, using a separate `git
   rev-parse --short HEAD` call)
-- [ ] `hooks_dir(cwd: &Path) -> Result<PathBuf>` via `git rev-parse --git-path hooks`
+- [x] `hooks_dir(cwd: &Path) -> Result<PathBuf>` via `git rev-parse --git-path hooks`
   (this respects a repo's `core.hooksPath` override, which hand-parsing
   `.git/` would have to reimplement)
-- [ ] `head_sha(cwd: &Path) -> Result<String>` via `git rev-parse HEAD`
-- [ ] A shared helper to run a `Command`, check its exit status, and turn a
+- [x] `head_sha(cwd: &Path) -> Result<String>` via `git rev-parse HEAD`
+- [x] A shared helper to run a `Command`, check its exit status, and turn a
   non-zero exit into an `Err` with the captured stderr — all four functions
   above should funnel through it rather than duplicating exit-status checks
-- [ ] Unit tests against real throwaway repos: `tempfile::tempdir()` + shelled
+- [x] Unit tests against real throwaway repos: `tempfile::tempdir()` + shelled
   `git init` + `git commit` (you'll need `-c user.email=... -c
   user.name=...` or equivalent env vars so this doesn't depend on your global
   git config being present in CI); include an explicit detached-HEAD test

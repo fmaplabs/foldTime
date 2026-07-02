@@ -26,6 +26,8 @@ pub enum Commands {
         since: Option<String>,
         #[arg(long)]
         until: Option<String>,
+        #[arg(long)]
+        idle_threshold_minutes: Option<u32>,
     },
 
     HookCommit,

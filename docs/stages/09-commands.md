@@ -12,11 +12,11 @@ order — `heartbeat` → `hook-commit` → `init` → `schema` → `report` —
 
 ## Tasks
 
-- [ ] `commands/heartbeat.rs`: `project::resolve_identity`, `db::open_db`,
+- [x] `commands/heartbeat.rs`: `project::resolve_identity`, `db::open_db`,
   `db::insert_heartbeat`, all wrapped in `errors::run_silently`
-- [ ] `commands/hook_commit.rs`: resolve identity, `git::head_sha`,
+- [x] `commands/hook_commit.rs`: resolve identity, `git::head_sha`,
   `db::tag_untagged_heartbeats`, wrapped in `run_silently`
-- [ ] `commands/init.rs`:
+- [x] `commands/init.rs`:
   - read `.git/hooks/post-commit` if it exists; if it already invokes
     `foldtime hook-commit`, no-op; if it exists but doesn't, append rather
     than overwrite (or warn and refuse — decide which)
@@ -26,12 +26,12 @@ order — `heartbeat` → `hook-commit` → `init` → `schema` → `report` —
   - `--with-config`: scaffold `.foldtime.json` and `.foldtime.schema.json` at
     the repo root, with `.foldtime.json`'s `$schema` field pointing at the
     sibling schema file by relative path
-- [ ] `commands/schema.rs`: `schemars::schema_for!(ProjectConfig)`, pretty-print
+- [x] `commands/schema.rs`: `schemars::schema_for!(ProjectConfig)`, pretty-print
   as JSON to stdout
-- [ ] `commands/report.rs`: `db::query_heartbeats`,
+- [x] `commands/report.rs`: `db::query_heartbeats`,
   `sessions::collapse_into_sessions`, print a plain-text table (project /
   task / duration / commit count)
-- [ ] Wire `main.rs`'s `match` arms to call these instead of printing stubs
+- [x] Wire `main.rs`'s `match` arms to call these instead of printing stubs
 
 ## Resources
 

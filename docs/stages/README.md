@@ -16,17 +16,17 @@ the "Resources" links are there for when a task doesn't make sense yet.
 
 | # | Stage | Status |
 |---|-------|--------|
-| 1 | [Scaffold](01-scaffold.md) | In progress |
-| 2 | [sessions.rs — pure session-collapsing algorithm](02-sessions.md) | Not started |
-| 3 | [paths.rs — filesystem locations](03-paths.md) | Not started |
-| 4 | [db.rs — SQLite storage](04-db.md) | Not started |
-| 5 | [git.rs — shelling out to git](05-git.md) | Not started |
-| 6 | [config.rs — .foldtime.json](06-config.md) | Not started |
-| 7 | [project.rs — identity resolution](07-project.md) | Not started |
-| 8 | [errors.rs — never fail loudly](08-errors.md) | Not started |
-| 9 | [cli.rs + commands/ — real implementations](09-commands.md) | Not started |
-| 10 | [integration_init_hook.rs — end-to-end test](10-integration-test.md) | Not started |
-| 11 | [Polish](11-polish.md) | Not started |
+| 1 | [Scaffold](01-scaffold.md) | Complete |
+| 2 | [sessions.rs — pure session-collapsing algorithm](02-sessions.md) | Complete |
+| 3 | [paths.rs — filesystem locations](03-paths.md) | Complete |
+| 4 | [db.rs — SQLite storage](04-db.md) | Complete |
+| 5 | [git.rs — shelling out to git](05-git.md) | Complete |
+| 6 | [config.rs — .foldtime.json](06-config.md) | Complete |
+| 7 | [project.rs — identity resolution](07-project.md) | Complete |
+| 8 | [errors.rs — never fail loudly](08-errors.md) | Complete |
+| 9 | [cli.rs + commands/ — real implementations](09-commands.md) | Complete |
+| 10 | [integration_init_hook.rs — end-to-end test](10-integration-test.md) | Complete |
+| 11 | [Polish](11-polish.md) | Complete |
 
 ## Sequencing note
 

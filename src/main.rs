@@ -3,24 +3,28 @@ use foldtime::cli::{
     Cli,
     Commands::{Heartbeat, HookCommit, Init, Report, Schema},
 };
-fn main() {
+use foldtime::commands;
+
+fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
     match cli.command {
-        Init { with_config } => {
-            println!("init: with_config={with_config}");
-        }
+        Init { with_config } => commands::init::run(with_config),
+        // heartbeat and hook-commit run silently: they always return () and
+        // exit 0 — failures land in ~/.foldtime/error.log instead.
         Heartbeat { file, write } => {
-            println!("heartbeat: file={file:?}, write={write}");
+            commands::heartbeat::run(file, write);
+            Ok(())
+        }
+        HookCommit => {
+            commands::hook_commit::run();
+            Ok(())
         }
         Report {
             project,
             since,
             until,
-        } => {
-            println!("report project={project:?}, since={since:?}, until={until:?}")
-        }
-        HookCommit => println!("hook-commit"),
-
-        Schema => println!("hook-commit"),
+            idle_threshold_minutes,
+        } => commands::report::run(project, since, until, idle_threshold_minutes),
+        Schema => commands::schema::run(),
     }
 }

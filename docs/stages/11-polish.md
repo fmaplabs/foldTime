@@ -5,7 +5,7 @@ about proving the whole thing actually works together.
 
 ## Tasks
 
-- [ ] Manual smoke test in a real (non-scratch) repo:
+- [x] Manual smoke test in a real (non-scratch) repo:
   - `foldtime init --with-config` → confirm `.git/hooks/post-commit`,
     `.foldtime.json`, `.foldtime.schema.json` all exist
   - a few `foldtime heartbeat` calls, then a `git commit`
@@ -13,15 +13,15 @@ about proving the whole thing actually works together.
     session
   - re-run `foldtime init` and confirm it detects the existing hook instead
     of clobbering it
-- [ ] Confirm `foldtime schema`'s output actually validates a scaffolded
+- [x] Confirm `foldtime schema`'s output actually validates a scaffolded
   `.foldtime.json` — opening the file in an editor that understands
   `$schema` (VS Code does this natively) is the easiest check
-- [ ] Confirm the "never fail loudly" property directly:
+- [x] Confirm the "never fail loudly" property directly:
   - `foldtime heartbeat` outside any git repo → exits 0, no crash, no row
     inserted
   - `foldtime heartbeat` inside a repo with a deliberately malformed
     `.foldtime.json` → exits 0, no crash, a warning appended to the error log
-- [ ] Write a short README: install (`cargo install --path .`, or build +
+- [x] Write a short README: install (`cargo install --path .`, or build +
   copy the binary onto `PATH`), `foldtime init` usage, `foldtime
   heartbeat`/`report` usage
 

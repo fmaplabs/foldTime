@@ -11,18 +11,18 @@ schema-generated so the schema can't drift from the parser.
 
 ## Tasks
 
-- [ ] Define `ProjectConfig` deriving `Serialize, Deserialize, JsonSchema`:
+- [x] Define `ProjectConfig` deriving `Serialize, Deserialize, JsonSchema`:
   `project: Option<String>`, `idle_threshold_minutes: Option<u32>` (field
   names in JSON should be `camelCase` per the plan's example — check
   `#[serde(rename_all = "camelCase")]`)
-- [ ] `DEFAULT_IDLE_THRESHOLD_MINUTES: u32 = 15` constant
-- [ ] `load_config(repo_root: &Path) -> ProjectConfig` — tolerant: file
+- [x] `DEFAULT_IDLE_THRESHOLD_MINUTES: u32 = 15` constant
+- [x] `load_config(repo_root: &Path) -> ProjectConfig` — tolerant: file
   missing → defaults; file present but malformed JSON → defaults **and** a
   warning logged (wire this to `errors.rs` once Stage 8 exists; until then,
   a `TODO` or a temporary `eprintln!` is fine)
-- [ ] Idle-threshold resolution helper implementing the precedence from the
+- [x] Idle-threshold resolution helper implementing the precedence from the
   plan: `cli_flag.or(project_config.idle_threshold_minutes).unwrap_or(DEFAULT_IDLE_THRESHOLD_MINUTES)`
-- [ ] Unit tests: valid config round-trips through `serde_json`; missing file
+- [x] Unit tests: valid config round-trips through `serde_json`; missing file
   → defaults; malformed JSON → defaults
 
 ## Resources
