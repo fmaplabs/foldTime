@@ -44,6 +44,51 @@ Heartbeats collapse into sessions: a gap longer than the idle threshold
 (default 15 minutes), or a switch of project/branch, starts a new session.
 `--since`/`--until` are inclusive calendar days in local time.
 
+One-line status for the repo you're in (`--json` is what statusline
+integrations consume; outside a git repo it exits 0 with null fields):
+
+```sh
+foldtime status          # foldTime · main · 2h 13m today
+foldtime status --json
+```
+
+## Neovim
+
+The repo doubles as a neovim plugin (`lua/` + `plugin/` at the root):
+automatic heartbeats while you edit, `:FoldTime {status|enable|disable}`,
+`:checkhealth foldtime`, and a statusline component. Requires nvim ≥ 0.10
+and the `foldtime` binary on `PATH` (or set `opts.cmd` to an absolute path).
+
+```lua
+-- any plugin manager; e.g. a vim.pack-style spec
+{
+	src = "https://github.com/fmaplabs/foldTime",
+	config = function()
+		require("foldtime").setup({
+			-- cmd = "foldtime",           -- binary name or absolute path
+			-- heartbeat_interval = 120,    -- seconds, per-file throttle
+			-- status_refresh_interval = 30,
+			-- exclude_filetypes = {},
+		})
+	end,
+}
+```
+
+Statusline (lualine shown; `get()`/`has()` are plain functions):
+
+```lua
+{
+	function() return require("foldtime.lualine").get() end,
+	cond = function()
+		local ok, ft = pcall(require, "foldtime.lualine")
+		return ok and ft.has()
+	end,
+}
+```
+
+See [docs/stages/13-nvim-plugin.md](docs/stages/13-nvim-plugin.md) for the
+design; `tests/nvim/run.sh` runs the plugin's headless smoke tests.
+
 ## Per-repo config (`.foldtime.json`, optional)
 
 ```json
