@@ -5,4 +5,5 @@ pub mod login;
 pub mod logout;
 pub mod report;
 pub mod schema;
+pub mod status;
 pub mod sync;

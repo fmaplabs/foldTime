@@ -32,6 +32,10 @@ pub enum Commands {
 
     HookCommit,
     Schema,
+    Status {
+        #[arg(long)]
+        json: bool,
+    },
 
     Login,
     Logout,

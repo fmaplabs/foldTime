@@ -78,7 +78,7 @@ fn column_width(header: &str, lens: impl Iterator<Item = usize>) -> usize {
     lens.chain([header.len()]).max().unwrap_or(0)
 }
 
-fn format_duration_ms(ms: i64) -> String {
+pub(crate) fn format_duration_ms(ms: i64) -> String {
     let minutes = ms / 60_000;
     let (hours, minutes) = (minutes / 60, minutes % 60);
     if hours > 0 {
