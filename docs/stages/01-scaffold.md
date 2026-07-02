@@ -29,13 +29,14 @@ surface that only prints stubs — no real logic yet.
   compile time)
   - `Init { #[arg(long)] with_config: bool }`
   - `Heartbeat { #[arg(long)] file: Option<String>, #[arg(long)] write: bool }`
-  - `Report { #[arg(long)] project: Option<String>, #[arg(long)] since: Option<String>, #[arg(long)] until: Option<String> }`
+  - `Report { #[arg(long)] project: Option<String>, #[arg(long)] since: Option<String>, #[arg(long)] until:
+  Option<String> }`
   - `HookCommit`, `Schema` — no fields, use bare unit variants (`HookCommit,`
     not `HookCommit {},`)
-- [ ] Run `cargo add` for the full dependency table: `clap --features derive`,
+- [x] Run `cargo add` for the full dependency table: `clap --features derive`,
   `rusqlite --features bundled`, `serde --features derive`, `serde_json`,
   `schemars --features derive`, `chrono`, `dirs`, `anyhow`, `tempfile --dev`
-- [ ] Rewrite `main.rs`: call `Cli::parse()`, then `match cli.command { ... }`
+- [x] Rewrite `main.rs`: call `Cli::parse()`, then `match cli.command { ... }`
   with a `println!` stub per arm showing what it received
 - [ ] Verify: `cargo build` succeeds; `cargo run -- init --with-config`,
   `cargo run -- heartbeat --file foo.rs --write`, `cargo run -- report
@@ -55,11 +56,13 @@ before assuming it's your code.
 
 ## Resources
 
-- [The Rust Book ch. 7 — Managing Growing Projects with Packages, Crates, and Modules](https://doc.rust-lang.org/book/ch07-00-managing-growing-projects-with-packages-crates-and-modules.html)
+- [The Rust Book ch. 7 — Managing Growing Projects with Packages, Crates, and
+Modules](https://doc.rust-lang.org/book/ch07-00-managing-growing-projects-with-packages-crates-and-modules.html)
 - [Cargo Book — Package Layout](https://doc.rust-lang.org/cargo/guide/project-layout.html)
 - [Cargo Book — Manifest Format (`Cargo.toml`)](https://doc.rust-lang.org/cargo/reference/manifest.html)
 - [`cargo add` reference](https://doc.rust-lang.org/cargo/commands/cargo-add.html)
 - [clap derive tutorial](https://docs.rs/clap/latest/clap/_derive/index.html)
 - [clap examples (runnable subcommand samples)](https://github.com/clap-rs/clap/tree/master/examples)
-- [The Rust Book ch. 6 — Enums and Pattern Matching](https://doc.rust-lang.org/book/ch06-00-enums-and-pattern-matching.html)
+- [The Rust Book ch. 6 — Enums and Pattern
+Matching](https://doc.rust-lang.org/book/ch06-00-enums-and-pattern-matching.html)
 - [The Rust Book Appendix C — Derivable Traits](https://doc.rust-lang.org/book/appendix-03-derivable-traits.html) (background on what `#[derive(...)]` does generally)
