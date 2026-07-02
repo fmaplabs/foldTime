@@ -1,4 +1,5 @@
 pub mod cli;
+pub mod cloud;
 pub mod commands;
 pub mod config;
 pub mod db;
@@ -7,3 +8,4 @@ pub mod git;
 pub mod paths;
 pub mod project;
 pub mod sessions;
+pub mod settings;

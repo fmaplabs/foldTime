@@ -4,7 +4,7 @@ use anyhow::{Context, Result};
 use chrono::{Local, NaiveDate, TimeZone};
 
 use crate::sessions::Session;
-use crate::{config, db, git, paths, sessions};
+use crate::{config, db, git, paths, sessions, settings};
 
 pub fn run(
     project: Option<String>,
@@ -21,7 +21,9 @@ pub fn run(
         .transpose()?;
 
     let home = paths::ensure_foldtime_home()?;
-    let conn = db::open_db(&paths::db_path(&home)).context("opening heartbeat db")?;
+    let settings = settings::load_or_init(&home)?;
+    let conn =
+        db::open_db(&paths::db_path(&home), &settings.device_id).context("opening heartbeat db")?;
     let heartbeats =
         db::query_heartbeats(&conn, project.as_deref(), None, since_ms, until_ms)
             .context("querying heartbeats")?;

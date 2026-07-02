@@ -32,4 +32,12 @@ pub enum Commands {
 
     HookCommit,
     Schema,
+
+    Login,
+    Logout,
+    Sync {
+        /// Push local heartbeats without pulling other machines' rows.
+        #[arg(long)]
+        push_only: bool,
+    },
 }

@@ -27,6 +27,7 @@ the "Resources" links are there for when a task doesn't make sense yet.
 | 9 | [cli.rs + commands/ — real implementations](09-commands.md) | Complete |
 | 10 | [integration_init_hook.rs — end-to-end test](10-integration-test.md) | Complete |
 | 11 | [Polish](11-polish.md) | Complete |
+| 12 | [Cloud sync via Convex](12-cloud-sync.md) | Code complete — manual provisioning pending |
 
 ## Sequencing note
 

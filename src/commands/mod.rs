@@ -1,5 +1,8 @@
 pub mod heartbeat;
 pub mod hook_commit;
 pub mod init;
+pub mod login;
+pub mod logout;
 pub mod report;
 pub mod schema;
+pub mod sync;

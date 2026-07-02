@@ -1,7 +1,7 @@
 use clap::Parser;
 use foldtime::cli::{
     Cli,
-    Commands::{Heartbeat, HookCommit, Init, Report, Schema},
+    Commands::{Heartbeat, HookCommit, Init, Login, Logout, Report, Schema, Sync},
 };
 use foldtime::commands;
 
@@ -26,5 +26,8 @@ fn main() -> anyhow::Result<()> {
             idle_threshold_minutes,
         } => commands::report::run(project, since, until, idle_threshold_minutes),
         Schema => commands::schema::run(),
+        Login => commands::login::run(),
+        Logout => commands::logout::run(),
+        Sync { push_only } => commands::sync::run(push_only),
     }
 }
