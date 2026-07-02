@@ -73,6 +73,38 @@ client clocks never feed cursors.
   Convex in a 0.25s commit), `foldtime sync` + `report` under the other
   shows the merged session with its commit hash
 
+## Why the endpoint defaults are compiled in
+
+Settings resolve in three levels (`src/settings.rs`), highest precedence
+first:
+
+1. **Env var** — `FOLDTIME_CONVEX_URL` / `FOLDTIME_WORKOS_CLIENT_ID` /
+   `FOLDTIME_WORKOS_API_URL`. Ephemeral overrides: the integration tests
+   point the binary at httpmock this way, and it's how you'd target a
+   staging backend ad hoc.
+2. **`~/.foldtime/config.json`** — `convexUrl` / `workosClientId`.
+   Persistent per-machine override with no env plumbing.
+3. **Baked-in `DEFAULT_*` consts** — only when neither of the above is set.
+
+The consts exist because of *who runs the binary and how*: `heartbeat` and
+`hook-commit` are invoked by editor plugins and git hooks, which often don't
+inherit a shell profile (GUI editors, git GUIs, anything not launched from a
+login shell). If the backend address lived only in an env var, the silent
+hook push would quietly no-op on any machine where the var didn't reach that
+process's environment — invisible by design, since the hook never fails
+loudly. Compiled-in defaults make `cargo install` + `foldtime login` fully
+zero-config regardless of how the process is spawned, the same way `gh`
+knows about github.com.
+
+Neither value is a secret: the Convex URL is public by nature and a WorkOS
+client id is a public OAuth identifier. The actual secrets
+(`WORKOS_API_KEY`, webhook secret) live only on the Convex deployment and in
+the gitignored `cloud/.env.local`.
+
+Trade-off: repointing the *default* backend (dev → prod) takes a rebuild.
+Acceptable while building from source — and level 2 already covers the
+no-rebuild case.
+
 ## Development
 
 - `cargo test` — all Rust units + httpmock + integration tests
