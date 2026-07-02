@@ -14,11 +14,13 @@ pub const CONVEX_URL_ENV_VAR: &str = "FOLDTIME_CONVEX_URL";
 pub const WORKOS_CLIENT_ID_ENV_VAR: &str = "FOLDTIME_WORKOS_CLIENT_ID";
 pub const WORKOS_API_URL_ENV_VAR: &str = "FOLDTIME_WORKOS_API_URL";
 
-// Baked-in defaults for the hosted backend. The Convex URL and WorkOS client
-// id are filled in once the production deployment is provisioned (stage 12,
-// manual step 10); until then they must come from env vars or config.json.
-const DEFAULT_CONVEX_URL: Option<&str> = None;
-const DEFAULT_WORKOS_CLIENT_ID: Option<&str> = None;
+// Baked-in defaults for the hosted backend: the Convex dev deployment
+// (team fmap-labs, project foldtime) and its auto-provisioned WorkOS
+// environment's client id (a public identifier, not a secret). Point these
+// at the production deployment once one exists; env vars and config.json
+// override them either way.
+const DEFAULT_CONVEX_URL: Option<&str> = Some("https://fast-ermine-429.convex.cloud");
+const DEFAULT_WORKOS_CLIENT_ID: Option<&str> = Some("client_01KWHZAYY87DH4X5W2T27BCXEV");
 const DEFAULT_WORKOS_API_URL: Option<&str> = Some("https://api.workos.com");
 
 /// Machine-scoped settings at `~/.foldtime/config.json`. Unlike the per-repo

@@ -57,17 +57,21 @@ client clocks never feed cursors.
   units, httpmock suites for auth/client/engine, convex-test suite for the
   backend, and black-box integration tests (`tests/integration_sync.rs`)
   including the offline-commit safety check
-- [ ] **[manual]** Provision WorkOS: dashboard → enable AuthKit + CLI Auth,
-  note the client id. Confirm the refresh-token grant needs no
-  `client_secret` for a CLI (public client) session — flagged during
-  implementation, only verifiable against a real WorkOS app
-- [ ] **[manual]** `cd cloud && npx convex deploy`; set `WORKOS_CLIENT_ID`
-  on the deployment (`npx convex env set`); bake the resulting
-  `DEFAULT_CONVEX_URL` / `DEFAULT_WORKOS_CLIENT_ID` into
-  `src/settings.rs`
-- [ ] **[manual]** E2E smoke: `foldtime login` under two `FOLDTIME_HOME`s,
-  heartbeat + commit under one, `foldtime sync` both, `foldtime report`
-  under the other shows the merged data
+- [x] Provision WorkOS — done via Convex's AuthKit auto-provision
+  (`convex.json` `"authKit": {}`): environment, client id, and env vars all
+  created against the dev deployment. The `@convex-dev/workos-authkit`
+  component is wired in (`convex.config.ts`, `auth.ts`, `http.ts` webhook
+  routes) to sync WorkOS users server-side for the future web GUI.
+  Confirmed live: the refresh-token grant works with `client_id` alone (no
+  `client_secret`) for CLI device-flow sessions, and rotation persists
+- [x] Deployment: functions pushed to `dev:fast-ermine-429`;
+  `DEFAULT_CONVEX_URL` / `DEFAULT_WORKOS_CLIENT_ID` baked into
+  `src/settings.rs` (dev deployment values — repoint at prod when one
+  exists)
+- [x] E2E smoke against the real stack: two `FOLDTIME_HOME`s, device-flow
+  login on both, heartbeat + commit under one (post-commit hook pushed to
+  Convex in a 0.25s commit), `foldtime sync` + `report` under the other
+  shows the merged session with its commit hash
 
 ## Development
 

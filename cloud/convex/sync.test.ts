@@ -3,6 +3,19 @@ import { convexTest } from "convex-test";
 import { api } from "./_generated/api";
 import schema from "./schema";
 
+// import.meta.glob is provided by Vite at runtime; the convex/ tsconfig
+// has no vite/client types, so declare just what's used.
+declare global {
+  interface ImportMeta {
+    glob: (pattern: string) => Record<string, () => Promise<unknown>>;
+  }
+}
+
+// pnpm nests convex-test too deep for its default module discovery to find
+// this convex/ directory — hand it the module map explicitly. The pattern
+// (from the convex-test docs) excludes *.test.ts files.
+const modules = import.meta.glob("./**/!(*.*.*)*.*s");
+
 const DEVICE_A = "device-a";
 const DEVICE_B = "device-b";
 
@@ -32,7 +45,7 @@ afterEach(() => {
 
 describe("push", () => {
   test("is idempotent: retrying a batch changes syncedAt but not the row count", async () => {
-    const t = convexTest(schema);
+    const t = convexTest(schema, modules);
     const asUser = t.withIdentity({ subject: "user-1" });
 
     vi.setSystemTime(10_000);
@@ -55,7 +68,7 @@ describe("push", () => {
   });
 
   test("registers the device and bumps lastSeenAt", async () => {
-    const t = convexTest(schema);
+    const t = convexTest(schema, modules);
     const asUser = t.withIdentity({ subject: "user-1" });
 
     vi.setSystemTime(10_000);
@@ -70,7 +83,7 @@ describe("push", () => {
   });
 
   test("rejects unauthenticated calls", async () => {
-    const t = convexTest(schema);
+    const t = convexTest(schema, modules);
     await expect(
       t.mutation(api.sync.push, pushArgs(DEVICE_A, [row("u1")])),
     ).rejects.toThrow("Not authenticated");
@@ -79,7 +92,7 @@ describe("push", () => {
 
 describe("pull", () => {
   test("pages through multiple syncedAt groups via nextCursor", async () => {
-    const t = convexTest(schema);
+    const t = convexTest(schema, modules);
     const asUser = t.withIdentity({ subject: "user-1" });
 
     vi.setSystemTime(10_000);
@@ -107,7 +120,7 @@ describe("pull", () => {
   });
 
   test("extends a full page through an equal-syncedAt tie instead of splitting it", async () => {
-    const t = convexTest(schema);
+    const t = convexTest(schema, modules);
     const asUser = t.withIdentity({ subject: "user-1" });
 
     // One push = one syncedAt shared by 5 rows; page limit is 2.
@@ -137,7 +150,7 @@ describe("pull", () => {
   });
 
   test("excludeDeviceId drops rows but still advances the cursor past them", async () => {
-    const t = convexTest(schema);
+    const t = convexTest(schema, modules);
     const asUser = t.withIdentity({ subject: "user-1" });
 
     vi.setSystemTime(10_000);
@@ -156,7 +169,7 @@ describe("pull", () => {
   });
 
   test("returns wire-shaped rows including the owning deviceId", async () => {
-    const t = convexTest(schema);
+    const t = convexTest(schema, modules);
     const asUser = t.withIdentity({ subject: "user-1" });
 
     vi.setSystemTime(10_000);
@@ -185,7 +198,7 @@ describe("pull", () => {
   });
 
   test("users never see each other's rows", async () => {
-    const t = convexTest(schema);
+    const t = convexTest(schema, modules);
     const asAlice = t.withIdentity({ subject: "alice" });
     const asBob = t.withIdentity({ subject: "bob" });
 
@@ -203,7 +216,7 @@ describe("pull", () => {
   });
 
   test("rejects unauthenticated calls", async () => {
-    const t = convexTest(schema);
+    const t = convexTest(schema, modules);
     await expect(
       t.query(api.sync.pull, { cursor: 0, limit: 10, excludeDeviceId: DEVICE_A }),
     ).rejects.toThrow("Not authenticated");
