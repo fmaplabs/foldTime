@@ -6,6 +6,8 @@ vim.notify = function() end -- keep enable/disable chatter out of the output
 
 local log_path = vim.env.FOLDTIME_SHIM_LOG
 
+--- Heartbeat calls logged by the shim (status --json fetches from the
+--- statusline cache also hit the shim, but aren't what these cases count).
 local function shim_lines()
 	local f = io.open(log_path, "r")
 	if not f then
@@ -13,7 +15,9 @@ local function shim_lines()
 	end
 	local lines = {}
 	for line in f:lines() do
-		lines[#lines + 1] = line
+		if line:find("|heartbeat ", 1, true) then
+			lines[#lines + 1] = line
+		end
 	end
 	f:close()
 	return lines
@@ -102,6 +106,18 @@ check(":FoldTime disable stops sends, enable resumes them", function()
 	local lines = settled_lines(before + 1)
 	assert(#lines == before + 1, "enable did not resume heartbeats")
 	assert(lines[#lines] == dir .. "|heartbeat --file " .. file3, "unexpected call: " .. lines[#lines])
+end)
+
+check("status cache feeds the lualine component", function()
+	local status = require("foldtime.status")
+	local lualine = require("foldtime.lualine")
+	status.refresh()
+	vim.wait(2000, function()
+		return status.get() ~= nil
+	end, 10)
+	local text = lualine.get()
+	assert(text:find("1h"), "expected the shim's 1h in: " .. text) -- canned 3600000 ms
+	assert(lualine.has(), "has() should be true with the canned project")
 end)
 
 if failed then

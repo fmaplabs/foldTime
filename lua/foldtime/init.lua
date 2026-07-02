@@ -22,6 +22,7 @@ function M.setup(opts)
 
 	local cli = require("foldtime.cli")
 	local heartbeat = require("foldtime.heartbeat")
+	local status = require("foldtime.status")
 	cli.setup(M.options)
 	heartbeat.setup(M.options)
 
@@ -52,9 +53,19 @@ function M.setup(opts)
 		callback = function(ev)
 			if M.enabled then
 				heartbeat.on_write(ev.buf)
+				-- refresh after the row lands so the statusline ticks up
+				vim.defer_fn(status.refresh, 1000)
 			end
 		end,
 	})
+	vim.api.nvim_create_autocmd("BufEnter", {
+		group = group,
+		callback = function()
+			status.on_buf_enter()
+		end,
+	})
+
+	status.start(M.options)
 end
 
 function M.enable()
