@@ -14,13 +14,13 @@ pub const CONVEX_URL_ENV_VAR: &str = "FOLDTIME_CONVEX_URL";
 pub const WORKOS_CLIENT_ID_ENV_VAR: &str = "FOLDTIME_WORKOS_CLIENT_ID";
 pub const WORKOS_API_URL_ENV_VAR: &str = "FOLDTIME_WORKOS_API_URL";
 
-// Baked-in defaults for the hosted backend: the Convex dev deployment
-// (team fmap-labs, project foldtime) and its auto-provisioned WorkOS
-// environment's client id (a public identifier, not a secret). Point these
-// at the production deployment once one exists; env vars and config.json
-// override them either way.
-const DEFAULT_CONVEX_URL: Option<&str> = Some("https://fast-ermine-429.convex.cloud");
-const DEFAULT_WORKOS_CLIENT_ID: Option<&str> = Some("client_01KWHZAYY87DH4X5W2T27BCXEV");
+// Baked-in defaults for the hosted backend: the Convex production
+// deployment (team fmap-labs, project foldtime) and its auto-provisioned
+// WorkOS environment's client id (a public identifier, not a secret).
+// Env vars and config.json override them either way — see the stage 12 doc
+// for the resolution rationale.
+const DEFAULT_CONVEX_URL: Option<&str> = Some("https://giant-elk-500.convex.cloud");
+const DEFAULT_WORKOS_CLIENT_ID: Option<&str> = Some("client_01KWJ14ZBG6MS30EVTRR2AZ7EX");
 const DEFAULT_WORKOS_API_URL: Option<&str> = Some("https://api.workos.com");
 
 /// Machine-scoped settings at `~/.foldtime/config.json`. Unlike the per-repo
@@ -114,7 +114,11 @@ impl Settings {
             DEFAULT_WORKOS_CLIENT_ID,
         )
         .with_context(|| {
-            missing_setting("WorkOS client id", WORKOS_CLIENT_ID_ENV_VAR, "workosClientId")
+            missing_setting(
+                "WorkOS client id",
+                WORKOS_CLIENT_ID_ENV_VAR,
+                "workosClientId",
+            )
         })
     }
 
@@ -273,9 +277,11 @@ mod tests {
         let err = load_or_init(home.path()).unwrap_err();
         assert!(err.to_string().contains("malformed"), "got: {err:#}");
         // The broken file must be left in place for the user to fix.
-        assert!(fs::read_to_string(config_path(home.path()))
-            .unwrap()
-            .contains("not json"));
+        assert!(
+            fs::read_to_string(config_path(home.path()))
+                .unwrap()
+                .contains("not json")
+        );
     }
 
     #[test]

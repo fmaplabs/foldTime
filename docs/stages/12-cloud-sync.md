@@ -64,10 +64,10 @@ client clocks never feed cursors.
   routes) to sync WorkOS users server-side for the future web GUI.
   Confirmed live: the refresh-token grant works with `client_id` alone (no
   `client_secret`) for CLI device-flow sessions, and rotation persists
-- [x] Deployment: functions pushed to `dev:fast-ermine-429`;
-  `DEFAULT_CONVEX_URL` / `DEFAULT_WORKOS_CLIENT_ID` baked into
-  `src/settings.rs` (dev deployment values — repoint at prod when one
-  exists)
+- [x] Deployment: `npx convex deploy` to production (`giant-elk-500`, with
+  its own auto-provisioned WorkOS environment); `DEFAULT_CONVEX_URL` /
+  `DEFAULT_WORKOS_CLIENT_ID` in `src/settings.rs` point there. The dev
+  deployment (`fast-ermine-429`) remains for `npx convex dev`
 - [x] E2E smoke against the real stack: two `FOLDTIME_HOME`s, device-flow
   login on both, heartbeat + commit under one (post-commit hook pushed to
   Convex in a 0.25s commit), `foldtime sync` + `report` under the other
