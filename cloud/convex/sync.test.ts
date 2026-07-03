@@ -82,6 +82,32 @@ describe("push", () => {
     expect(devices[0].lastSeenAt).toBe(20_000);
   });
 
+  test("auto-registers a projects row per distinct project name, without duplicating", async () => {
+    const t = convexTest(schema, modules);
+    const asUser = t.withIdentity({ subject: "user-1" });
+
+    vi.setSystemTime(10_000);
+    await asUser.mutation(
+      api.sync.push,
+      pushArgs(DEVICE_A, [
+        row("u1", { project: "foo" }),
+        row("u2", { project: "bar" }),
+        row("u3", { project: "foo" }),
+      ]),
+    );
+    // A later push of an already-seen project must not create a second row.
+    vi.setSystemTime(20_000);
+    await asUser.mutation(api.sync.push, pushArgs(DEVICE_A, [row("u4", { project: "foo" })]));
+
+    const projects = await t.run(async (ctx) => ctx.db.query("projects").collect());
+    expect(projects.map((p) => p.name).sort()).toEqual(["bar", "foo"]);
+    for (const p of projects) {
+      expect(p.userId).toBe("user-1");
+      expect(p.clientId).toBeUndefined();
+      expect(p.lastBilledSyncedAt).toBeUndefined();
+    }
+  });
+
   test("rejects unauthenticated calls", async () => {
     const t = convexTest(schema, modules);
     await expect(

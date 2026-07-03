@@ -1,6 +1,8 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
+// Every row is owned by a WorkOS `identity.subject` string (`userId`). New
+// billing tables follow the same `by_user_*` index convention as heartbeats.
 export default defineSchema({
 	// One row per heartbeat, owned by the (userId, deviceId) that recorded it.
 	// `syncedAt` is the server clock at the push that last wrote the row — it
@@ -18,7 +20,10 @@ export default defineSchema({
 		syncedAt: v.number(),
 	})
 		.index("by_user_uuid", ["userId", "uuid"])
-		.index("by_user_synced", ["userId", "syncedAt"]),
+		.index("by_user_synced", ["userId", "syncedAt"])
+		// Billing reads all unbilled heartbeats for one project in `syncedAt`
+		// order (syncedAt > project.lastBilledSyncedAt).
+		.index("by_user_project_synced", ["userId", "project", "syncedAt"]),
 
 	devices: defineTable({
 		userId: v.string(),
@@ -26,4 +31,80 @@ export default defineSchema({
 		name: v.string(),
 		lastSeenAt: v.number(),
 	}).index("by_user_device", ["userId", "deviceId"]),
+
+	// A billable customer. `rateCents` overrides the global default; a project's
+	// own rate overrides this. `stripeCustomerId` is filled lazily on first
+	// invoice.
+	clients: defineTable({
+		userId: v.string(),
+		name: v.string(),
+		email: v.string(),
+		rateCents: v.optional(v.number()),
+		stripeCustomerId: v.optional(v.string()),
+		archived: v.optional(v.boolean()),
+	})
+		.index("by_user", ["userId"])
+		.index("by_user_name", ["userId", "name"]),
+
+	// A project entity keyed by `name` == heartbeats.project (auto-registered on
+	// sync). `lastBilledSyncedAt` is the billing watermark: heartbeats with a
+	// larger `syncedAt` are unbilled. `unbilledMsCache` is a dashboard estimate.
+	projects: defineTable({
+		userId: v.string(),
+		name: v.string(),
+		displayName: v.optional(v.string()),
+		clientId: v.optional(v.id("clients")),
+		rateCents: v.optional(v.number()),
+		lastBilledSyncedAt: v.optional(v.number()),
+		unbilledMsCache: v.optional(v.number()),
+		unbilledCacheUpdatedAt: v.optional(v.number()),
+		archived: v.optional(v.boolean()),
+	})
+		.index("by_user_name", ["userId", "name"])
+		.index("by_user_client", ["userId", "clientId"]),
+
+	// One config row per user.
+	settings: defineTable({
+		userId: v.string(),
+		defaultRateCents: v.number(),
+		currency: v.string(),
+		idleThresholdMs: v.optional(v.number()),
+	}).index("by_user", ["userId"]),
+
+	// A generated invoice. Money is stored in integer minor units (`cents`). The
+	// resolved rate is snapshotted at claim time so later rate edits never
+	// re-price a past invoice. `period*SyncedAt` records the billed watermark
+	// window for audit. Stripe fields are written authoritatively by the webhook.
+	invoices: defineTable({
+		userId: v.string(),
+		clientId: v.id("clients"),
+		projectId: v.id("projects"),
+		status: v.union(
+			v.literal("draft"),
+			v.literal("open"),
+			v.literal("paid"),
+			v.literal("void"),
+			v.literal("failed"),
+		),
+		stripeInvoiceId: v.optional(v.string()),
+		stripeCustomerId: v.optional(v.string()),
+		hostedInvoiceUrl: v.optional(v.string()),
+		invoicePdfUrl: v.optional(v.string()),
+		rateCentsSnapshot: v.number(),
+		currency: v.string(),
+		hours: v.number(),
+		amountCents: v.number(),
+		periodStartSyncedAt: v.number(),
+		periodEndSyncedAt: v.number(),
+		heartbeatCount: v.optional(v.number()),
+		createdAt: v.number(),
+		finalizedAt: v.optional(v.number()),
+		paidAt: v.optional(v.number()),
+	})
+		.index("by_user", ["userId"])
+		.index("by_user_status", ["userId", "status"])
+		.index("by_user_project", ["userId", "projectId"])
+		// Global (no userId): the Stripe webhook has no user context and Stripe
+		// ids are globally unique. Tolerates the pre-finalize `undefined`.
+		.index("by_stripe_invoice", ["stripeInvoiceId"]),
 });
