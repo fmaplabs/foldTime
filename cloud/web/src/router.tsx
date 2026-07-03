@@ -11,6 +11,7 @@ import { ConvexProviderWithAuth, ConvexReactClient } from "convex/react";
 import { useCallback, useMemo } from "react";
 import { env } from "./env";
 import { routeTree } from "./routeTree.gen";
+
 export function getRouter() {
 	const CONVEX_URL = env.VITE_CONVEX_URL;
 	if (!CONVEX_URL) {

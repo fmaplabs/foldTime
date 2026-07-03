@@ -5,10 +5,8 @@ import {
 	HeadContent,
 	Scripts,
 } from "@tanstack/react-router";
+import { getAuth } from "@workos/authkit-tanstack-react-start";
 import type { ConvexReactClient } from "convex/react";
-import ConvexProvider from "../integrations/convex/provider";
-import WorkOSProvider from "../integrations/workos/provider";
-
 import appCss from "../styles.css?url";
 
 interface RouterContext {
@@ -39,20 +37,31 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 		],
 	}),
 	shellComponent: RootDocument,
+	notFoundComponent: () => <div>Not Found</div>,
+	beforeLoad: async (ctx) => {
+		const auth = await getAuth();
+
+		// During SSR only (the only time serverHttpClient exists),
+		// set the WorkOS auth token to make HTTP queries with.
+		if (auth.user) {
+			ctx.context.convexQueryClient.serverHttpClient?.setAuth(auth.accessToken);
+		}
+
+		return { user: auth.user };
+	},
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
-	const { convexClient } = Route.useRouteContext();
-
+	// Auth + Convex providers are supplied by the router's `InnerWrap`
+	// (AuthKitProvider → ConvexProviderWithAuth in router.tsx), so the
+	// document shell only needs to render the app tree.
 	return (
 		<html lang="en">
 			<head>
 				<HeadContent />
 			</head>
 			<body>
-				<WorkOSProvider>
-					<ConvexProvider client={convexClient}>{children}</ConvexProvider>
-				</WorkOSProvider>
+				{children}
 				<Scripts />
 			</body>
 		</html>
