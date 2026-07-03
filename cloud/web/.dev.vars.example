@@ -1,0 +1,23 @@
+# Local Worker runtime secrets for the WorkOS AuthKit server middleware.
+#
+# Copy to `.dev.vars` (gitignored). These are read from process.env by the
+# server code and are used when you run the built Worker locally:
+#
+#     wrangler dev            # runs the real Worker bundle in workerd
+#
+# `vite dev` reads .env.local instead, so for the normal dev loop you don't need
+# this file — it exists so you can smoke-test the production Worker before
+# deploying. In production these become Worker secrets via `wrangler secret put`.
+
+# Public WorkOS client id (client_...).
+WORKOS_CLIENT_ID=client_REPLACE_ME
+
+# WorkOS secret API key. Use sk_test_... locally, sk_live_... in production.
+WORKOS_API_KEY=sk_test_REPLACE_ME
+
+# 32+ character random string used to encrypt the session cookie.
+# Generate with: openssl rand -base64 32
+WORKOS_COOKIE_PASSWORD=REPLACE_WITH_32_PLUS_CHAR_RANDOM_STRING
+
+# Must exactly match a redirect URI registered in the WorkOS dashboard.
+WORKOS_REDIRECT_URI=http://localhost:3000/api/auth/callback

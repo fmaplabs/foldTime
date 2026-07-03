@@ -4,7 +4,8 @@
     "type": "module",
     "scripts": {
         "dev": "convex dev --start 'pnpm --filter web dev'",
-        "deploy": "convex deploy",
+        "deploy:convex": "convex deploy",
+        "deploy": "convex deploy --cmd 'pnpm --filter web run deploy' --cmd-url-env-var-name VITE_CONVEX_URL",
         "test": "vitest run"
     },
     "dependencies": {
