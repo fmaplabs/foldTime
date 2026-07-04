@@ -1,5 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { requireUserId } from "./lib/auth";
 
 // A heartbeat as it travels over the wire — mirrors the CLI's SyncRow.
 const syncRow = v.object({
@@ -22,16 +23,6 @@ const pulledRow = v.object({
   commitHash: v.optional(v.string()),
   deviceId: v.string(),
 });
-
-async function requireUserId(ctx: {
-  auth: { getUserIdentity: () => Promise<{ subject: string } | null> };
-}): Promise<string> {
-  const identity = await ctx.auth.getUserIdentity();
-  if (identity === null) {
-    throw new Error("Not authenticated");
-  }
-  return identity.subject;
-}
 
 // Upsert a batch of this device's rows. Idempotent: the CLI may retry a
 // batch whose response it never saw. One `syncedAt` for the whole call keeps
@@ -67,6 +58,24 @@ export const push = mutation({
           deviceId: args.deviceId,
           syncedAt,
         });
+      }
+    }
+
+    // Auto-register a `projects` row for each distinct project name we see, so
+    // the web app can discover and bill projects without scanning heartbeats.
+    // Deduped per batch to keep this cheap on the hot sync path.
+    const seenProjects = new Set<string>();
+    for (const row of args.rows) {
+      if (seenProjects.has(row.project)) continue;
+      seenProjects.add(row.project);
+      const project = await ctx.db
+        .query("projects")
+        .withIndex("by_user_name", (q) =>
+          q.eq("userId", userId).eq("name", row.project),
+        )
+        .unique();
+      if (project === null) {
+        await ctx.db.insert("projects", { userId, name: row.project });
       }
     }
 

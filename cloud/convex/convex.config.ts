@@ -10,6 +10,7 @@ const app = defineApp({
 		WORKOS_ENVIRONMENT_ID: v.string(),
 		STRIPE_PUBLISHABLE_KEY: v.string(),
 		STRIPE_SECRET_KEY: v.string(),
+		STRIPE_WEBHOOK_SECRET: v.string(),
 	},
 });
 

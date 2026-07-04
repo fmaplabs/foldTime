@@ -33,6 +33,9 @@ Domain                        |
 | `WORKOS_REDIRECT_URI`      | **Worker secret** only                            | `https://<prod-domain>/api/auth/callback`                       |
 | `WORKOS_ENVIRONMENT_ID`    | **Convex env** only                               | required by `convex/convex.config.ts`                           |
 | `WORKOS_WEBHOOK_SECRET`    | **Convex env** only                               | verifies the WorkOS webhook                                     |
+| `STRIPE_SECRET_KEY`        | **Convex env** only                               | `sk_live_...`; used to create/finalize invoices                |
+| `STRIPE_PUBLISHABLE_KEY`   | **Convex env** only                               | `pk_live_...`; required by `convex/convex.config.ts`           |
+| `STRIPE_WEBHOOK_SECRET`    | **Convex env** only                               | `whsec_...`; verifies the Stripe invoice webhook               |
 
 - **Worker secrets** are set with `wrangler secret put <NAME>` (run in `web/`) and reach the
   server code through `process.env` (auto-populated because `nodejs_compat` + compat date
@@ -80,7 +83,28 @@ npx convex env list --prod
 > **before** the deploy you rely on (the first deploy just creates the deployment; re-run
 > `convex deploy` after setting env, or set env then deploy).
 
-### 3. Cloudflare Worker (secrets + build env)
+### 3. Stripe (invoicing)
+
+In the Stripe dashboard (use **test mode** first):
+
+- Copy the **Secret key** (`sk_...`) and **Publishable key** (`pk_...`).
+- Add a **Webhook** pointing at your prod Convex site domain:
+  `https://<prod-convex-name>.convex.site/stripe/webhook`. Subscribe to at least
+  `invoice.finalized`, `invoice.paid`, `invoice.payment_failed`, and `invoice.voided`.
+  Note its **signing secret** (`whsec_...`).
+
+```bash
+# From this directory (cloud/):
+npx convex env set STRIPE_SECRET_KEY       <sk_...>     --prod
+npx convex env set STRIPE_PUBLISHABLE_KEY  <pk_...>     --prod
+npx convex env set STRIPE_WEBHOOK_SECRET   <whsec_...>  --prod
+```
+
+> All three are required by `convex/convex.config.ts`, so a deploy fails until they are set.
+> For local dev, set the same keys with `npx convex env set <NAME> <value>` (no `--prod`) and
+> forward events with `stripe listen --forward-to <dev-convex-site>/stripe/webhook`.
+
+### 4. Cloudflare Worker (secrets + build env)
 
 ```bash
 cd web

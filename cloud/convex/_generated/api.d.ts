@@ -9,7 +9,16 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as clients from "../clients.js";
 import type * as http from "../http.js";
+import type * as invoices from "../invoices.js";
+import type * as lib_auth from "../lib/auth.js";
+import type * as lib_rates from "../lib/rates.js";
+import type * as lib_sessions from "../lib/sessions.js";
+import type * as projects from "../projects.js";
+import type * as revenue from "../revenue.js";
+import type * as settings from "../settings.js";
+import type * as stripe from "../stripe.js";
 import type * as sync from "../sync.js";
 
 import type {
@@ -20,7 +29,16 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  clients: typeof clients;
   http: typeof http;
+  invoices: typeof invoices;
+  "lib/auth": typeof lib_auth;
+  "lib/rates": typeof lib_rates;
+  "lib/sessions": typeof lib_sessions;
+  projects: typeof projects;
+  revenue: typeof revenue;
+  settings: typeof settings;
+  stripe: typeof stripe;
   sync: typeof sync;
 }>;
 
@@ -52,4 +70,5 @@ export declare const internal: FilterApi<
 
 export declare const components: {
   workOSAuthKit: import("@convex-dev/workos-authkit/_generated/component.js").ComponentApi<"workOSAuthKit">;
+  stripe: import("@convex-dev/stripe/_generated/component.js").ComponentApi<"stripe">;
 };
