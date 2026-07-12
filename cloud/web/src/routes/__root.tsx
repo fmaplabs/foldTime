@@ -7,6 +7,8 @@ import {
 } from "@tanstack/react-router";
 import { getAuth } from "@workos/authkit-tanstack-react-start";
 import type { ConvexReactClient } from "convex/react";
+
+import { ThemeProvider } from "@/components/theme-provider";
 import appCss from "../styles.css?url";
 
 interface RouterContext {
@@ -56,12 +58,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 	// (AuthKitProvider → ConvexProviderWithAuth in router.tsx), so the
 	// document shell only needs to render the app tree.
 	return (
-		<html lang="en">
+		<html lang="en" suppressHydrationWarning>
 			<head>
 				<HeadContent />
 			</head>
 			<body>
-				{children}
+				<ThemeProvider defaultTheme="system" storageKey="theme">
+					{children}
+				</ThemeProvider>
 				<Scripts />
 			</body>
 		</html>
