@@ -31,10 +31,14 @@ future join key for branch-per-ticket workflows).
   `totalTimeMs`, bucketed by ticket `_creationTime`. Adding them together
   would double-count when tracked work was also declared on a ticket, so the
   UI shows tracked as the headline number and ticketed as a secondary line.
-- **No schema changes beyond one index.** The `tickets` table from `f2e315d`
+- **No schema changes beyond two indexes.** The `tickets` table from `f2e315d`
   stays as-is; add `by_user_project ["userId", "projectId"]` for the project
-  detail page. `clientId` stays denormalized on the ticket (a project may have
-  no client, so the form asks for both, auto-filling client from the project).
+  detail page and `by_user ["userId"]` so the full list can scan newest-first
+  (`.order("desc")` on `_creationTime`) — every capped ticket scan reads
+  descending so overflow past 500 drops the *oldest* rows, never a
+  just-created ticket. `clientId` stays denormalized on the ticket (a project
+  may have no client, so the form asks for both, auto-filling client from the
+  project).
 - **Reactive bounded scans, no caches.** Hours queries follow the existing
   `REPO_SCAN_LIMIT`+`truncated` pattern rather than aggregate tables or crons —
   consistent with `revenue.ts` and right for this data volume. Alternatives
@@ -68,9 +72,12 @@ Shared `ticketView` validator: `_id`, `externalId`, `name`,
 
 ### clients.ts — get + hoursSummary
 
-- `get({ id })` → `v.union(clientView, v.null())`. Returns `null` for
-  missing/foreign/archived ids (detail page renders "not found" instead of
-  crashing on a stale URL).
+- `get({ id })` → `v.union(clientView, v.null())`. Takes the raw route param
+  as `v.string()` and resolves it via `ctx.db.normalizeId`, so malformed URLs
+  read as `null` (the "not found" page) instead of throwing an
+  ArgumentValidationError into the router. Returns `null` only for
+  missing/foreign/malformed ids; **archived clients stay reachable** — their
+  tickets still link here, and a live-looking link must not dead-end.
 - `hoursSummary({ clientId })` → for the client's projects
   (`projects.by_user_client`):
 
@@ -87,22 +94,30 @@ Shared `ticketView` validator: `_id`, `externalId`, `name`,
   }
   ```
 
-  - Billing-period cutoff: max `createdAt` of this client's `open|paid|void`
-    invoices (`invoices.by_user_client`, take 1000); `null` if none.
+  - Billing-period cutoff: max `createdAt` of this client's successful
+    invoices — the `isSuccessfulInvoice` (`open|paid|void`) predicate shared
+    with `revenue.repoUnbilledBreakdown` via `lib/invoices.ts` —
+    (`invoices.by_user_client`, `.order("desc")`, take 1000); `null` if none.
   - Trailing cutoffs: `now − 90/180/365` days.
-  - One heartbeat scan per project via `by_user_project_synced` with
+  - Heartbeat scans per project via `by_user_project_synced` with
     `gte("syncedAt", minCutoff)` where `minCutoff = min(billingCutoff ?? 0,
-    now − 365 d)`, capped at 10 000 rows/project with an extra row to set
-    `truncated` (`syncedAt >= ts`, so the indexed superset is narrowed by
-    `ts` in JS — same trick as `repoUnbilledBreakdown`). Scan `.order("desc")`
-    so a truncated scan keeps the *most recent* rows — the windows are
-    anchored at now (the `activityByWindow` precedent, not
-    `repoUnbilledBreakdown`'s ascending scan).
-  - Per period: filter the combined rows to `ts >= cutoff`, then one
-    `billableMs(rows, idleThresholdMs)` across all of the client's projects
-    and devices together, so concurrent multi-project time counts once.
-  - Ticket ms per period: client's tickets (`by_user_client`, take 500),
-    sum `totalTimeMs` where `_creationTime >= cutoff` (billing period with
+    now − 365 d)`, drawing on a single **global 10 000-row budget** across
+    all of the client's projects (per-project caps would multiply past
+    Convex's per-query document read limit); overflow sets `truncated`
+    (`syncedAt >= ts`, so the indexed superset is narrowed by `ts` in JS —
+    same trick as `repoUnbilledBreakdown`). Scans `.order("desc")` so
+    truncation keeps the *most recent* rows — the windows are anchored at now
+    (the `activityByWindow` precedent, not `repoUnbilledBreakdown`'s
+    ascending scan).
+  - Tracked ms per period: group the combined rows by device and sort each
+    stream ascending **once**; each period sessionizes its `ts >= cutoff`
+    suffix (`collapseIntoSessions`) and unions the intervals across all of
+    the client's projects and devices (`unionLengthMs`), so concurrent
+    multi-project/multi-device time counts once — semantically `billableMs`
+    on the filtered rows, without re-partitioning and re-sorting four times.
+  - Ticket ms per period: client's tickets (`by_user_client`,
+    `.order("desc")`, take 501 — overflow folds into `truncated`), sum
+    `totalTimeMs` where `_creationTime >= cutoff` (billing period with
     `null` cutoff counts all).
   - Throws ConvexError "Client not found" on bad ownership (the page gates
     this query on `get` having resolved).
@@ -110,8 +125,10 @@ Shared `ticketView` validator: `_id`, `externalId`, `name`,
 ### projects.ts — get
 
 `get({ id })` → `v.union(projectView, v.null())` (same view as `list`,
-including `clientName` and `effectiveRateCents`); `null` for
-missing/foreign/archived.
+including `clientName` and `effectiveRateCents`, resolved with one targeted
+`ctx.db.get` of the project's client rather than the full client map); raw
+`v.string()` id + `normalizeId` like `clients.get`; `null` for
+missing/foreign/malformed, archived reachable.
 
 ### Tests (convex-test, existing conventions)
 
